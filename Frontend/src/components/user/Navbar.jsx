@@ -1,13 +1,19 @@
 import React from "react";
 import { FaSun } from "react-icons/fa";
 import Container from "../Container";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth, useTheme } from "../../hooks";
+import AppSearchForm from "../form/AppSearchForm";
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
   const { authInfo, handleLogout } = useAuth();
   const { isLoggedIn } = authInfo;
+
+  const navigate = useNavigate();
+  const handleSearchSubmit = (query) => {
+    navigate("/movie/search?title=" + query);
+  };
 
   return (
     <div className="bg-bordeaux shadow-sm shadow-gray-500">
@@ -17,7 +23,7 @@ export default function Navbar() {
             <img className="h-10" src="./movies.png" alt="movies.logo" />
           </Link>
 
-          <ul className="flex items-center space-x-4">
+          <ul className="flex items-center sm:space-x-4 space-x-2">
             <li>
               <button
                 onClick={toggleTheme}
@@ -27,10 +33,10 @@ export default function Navbar() {
               </button>
             </li>
             <li>
-              <input
-                type="text"
-                className="border-2 border-dark-subtle p-1 rounded bg-red-950 text-xs outline-none"
+              <AppSearchForm
                 placeholder="Search"
+                inputClassName="border-dark-subtle text-white focus:border-white sm:w-auto w-40"
+                onSubmit={handleSearchSubmit}
               />
             </li>
             {isLoggedIn ? (

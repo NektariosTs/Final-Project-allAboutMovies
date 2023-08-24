@@ -75,23 +75,23 @@ exports.validateMovie = [
 
             return true;
         }),
-    check("trailer").isObject().withMessage("trailer must be an object with url and public_id")
-        .custom(({ url, public_id }) => {
-            try {
-                const result = new URL(url)
-                if (!result.protocol.includes("http")) throw Error("Trailer url is invalid!");
+    // check("trailer").isObject().withMessage("trailer must be an object with url and public_id")
+    //     .custom(({ url, public_id }) => {
+    //         try {
+    //             const result = new URL(url)
+    //             if (!result.protocol.includes("http")) throw Error("Trailer url is invalid!");
 
-                const arr = url.split("/")
-                const publicId = arr[arr.length - 1].split(".")[0];
+    //             const arr = url.split("/")
+    //             const publicId = arr[arr.length - 1].split(".")[0];
 
-                if (public_id !== publicId) throw Error("trailer public_id is invalid!");
+    //             if (public_id !== publicId) throw Error("trailer public_id is invalid!");
 
-                return true;
-            } catch (error) {
-                throw Error("Trailer url is invalid!");
-            }//this is the method to validate the url if you go to the console and put new URL(url) will see an object with lot of things, if you search you will see the protocol:https or http! and with the public id we use the split method and to split the url with the "/" and after that inside the array we use the -1 to find the id of the trailer one more split method with the . because the last is mp4
+    //             return true;
+    //         } catch (error) {
+    //             throw Error("Trailer url is invalid!");
+    // }//this is the method to validate the url if you go to the console and put new URL(url) will see an object with lot of things, if you search you will see the protocol:https or http! and with the public id we use the split method and to split the url with the "/" and after that inside the array we use the -1 to find the id of the trailer one more split method with the . because the last is mp4
 
-        }),
+    // }),
     // check("poster")
     //     .custom((_, { req }) => {
     //         if (!req.file) throw Error("poster file is missing!");
@@ -100,6 +100,31 @@ exports.validateMovie = [
     //     }),//Underscore can be used for ignoring function parameters. For example, you may define a function that requires parameters, but you don’t intend to use all of them at that time.
 ];
 
+exports.validateTrailer = check("trailer")
+    .isObject()
+    .withMessage("trailer must be an object with url and public_id")
+    .custom(({ url, public_id }) => {
+        try {
+            const result = new URL(url)
+            if (!result.protocol.includes("http")) throw Error("Trailer url is invalid!");
+
+            const arr = url.split("/")
+            const publicId = arr[arr.length - 1].split(".")[0];
+
+            if (public_id !== publicId) throw Error("trailer public_id is invalid!");
+
+            return true;
+        } catch (error) {
+            throw Error("Trailer url is invalid!");
+        };//this is the method to validate the url if you go to the console and put new URL(url) will see an object with lot of things, if you search you will see the protocol:https or http! and with the public id we use the split method and to split the url with the "/" and after that inside the array we use the -1 to find the id of the trailer one more split method with the . because the last is mp4
+
+    }),
+
+    exports.validateRatings = check(
+        "rating",
+        "Rating must be a number between one 0 and 10")
+        .isFloat({ min: 0, max: 10 });
+
 //use this middleware to see the result validation at postman
 //validationResult creates a function that uses provided options as the defaults in the returned Result object
 exports.validate = (req, res, next) => {
@@ -107,5 +132,6 @@ exports.validate = (req, res, next) => {
     if (error.length) {
         return res.json({ error: error[0].msg });
     }
+
     next();
 };

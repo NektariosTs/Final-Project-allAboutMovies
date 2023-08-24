@@ -1,7 +1,10 @@
-const { isValidObjectId } = require("mongoose");
+const { isValidObjectId} = require("mongoose");
 const Actor = require("../models/actor")
 const cloudinary = require('cloudinary').v2;//we use cloudinary to store our images and trailer videos
-const { sendError } = require("../utils/helper")
+const { sendError, formatActor } = require("../utils/helper");
+
+
+
 
 
 cloudinary.config({
@@ -23,7 +26,7 @@ exports.createActor = async (req, res) => {
         newActor.avatar = { url: secure_url, public_id };
     }
     await newActor.save()
-    res.status(201).json({ id: newActor._id, name, about, gender, avatar: newActor.avatar?.url });
+    res.status(201).json({ actor: formatActor(newActor) });
 
 
 };
@@ -62,7 +65,7 @@ exports.updateActor = async (req, res) => {
     actor.gender = gender;
 
     await actor.save()
-    res.status(201).json({ id: actor._id, name, about, gender, avatar: actor.avatar?.url });
+    res.status(201).json({ actor: formatActor(actor) });
 };
 
 exports.removeActor = async (req, res) => {
@@ -89,11 +92,16 @@ exports.removeActor = async (req, res) => {
 };
 
 
+// is find method we use it inside the actor(mongodb documantation), we use template string because we want to fine a spacific name of actor (for example if we have two actors with name tom cruise or tom something and we searching about tom cruise with aout this template query.name the result will be the two of them, but with this query.name we search specific name)
 exports.searchActor = async (req, res) => {
-    const { query } = req
-    query.name
-    const result = await Actor.find({ $text: { $search: `"${query.name}"` } })// is find method we use it inside the actor(mongodb documantation), we use template string because we want to fine a spacific name of actor (for example if we have two actors with name tom cruise or tom something and we searching about tom cruise with aout this template query.name the result will be the two of them, but with this query.name we search specific name)
-    res.json(result);
+    const { name } = req.query;
+    // const result = await Actor.find({ $text: { $search: `"${query.name}"` } });
+    if (!name.trim()) return sendError(res, "Invalid request!");
+    const result = await Actor.find({
+      name: { $regex: name, $options: "i" },
+    });//we want to search the actor with only 3 letters for example
+    const actors = result.map((actor) => formatActor(actor));
+    res.json({ results: actors });
 };
 
 exports.getLatestActors = async (req, res) => {
@@ -111,3 +119,20 @@ exports.getSingleActor = async (req, res) => {
 
     res.json(actor);
 }
+// to find actors with pagination
+//we find all the actors
+//we sorting them we want to select the latest actor at the beggining
+//if it skip 0 item and select the items and the actors with this limits f.x if i have this limits of five only select only first five items and if increase the pageNumber this skip will be increased and will skip the value that we have inside the skip method and then it select items according to limit 
+exports.getActors = async (req, res) => {
+    const { pageNo, limit } = req.query;
+
+    const actors = await Actor.find({})
+        .sort({ createdAt: -1 })
+        .skip(parseInt(pageNo) * parseInt(limit))
+        .limit(parseInt(limit));
+
+    const profiles = actors.map((actor) => formatActor(actor));
+    res.json({
+        profiles,
+    });
+};

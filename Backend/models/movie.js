@@ -44,7 +44,7 @@ const movieSchema = mongoose.Schema({
             actor: { type: mongoose.Schema.Types.ObjectId, ref: "Actor" },
             roleAs: String,
             leadActor: Boolean,
-        }
+        },
     ],
     writers: [
         {

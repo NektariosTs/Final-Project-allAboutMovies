@@ -3,6 +3,8 @@ const mongoose = require("mongoose")
 const userRouter = require("./routes/user")
 const actorRouter = require("./routes/actor")
 const movieRouter = require("./routes/movie");
+const reviewRouter = require("./routes/review");
+const adminRouter = require("./routes/admin");
 const { errorHandler } = require("./middlewares/error")
 const cors = require("cors");
 const { handleNotFound } = require("./utils/helper");
@@ -15,6 +17,8 @@ app.use(express.json());
 app.use("/api", userRouter);
 app.use("/api/actor", actorRouter);
 app.use("/api/movie", movieRouter);
+app.use("/api/review", reviewRouter);
+app.use("/api/admin", adminRouter);
 app.use("/*", handleNotFound);
 app.use(errorHandler);//function for error handling
 

@@ -2,33 +2,73 @@ import React, { useState } from "react";
 import { FileUploader } from "react-drag-drop-files"; //is package for drag and drop from npm
 import { FiUploadCloud } from "react-icons/fi";
 import { useNotification } from "../../hooks";
-import { uploadTrailer } from "../../api/movie";
+import { uploadMovie, uploadTrailer } from "../../api/movie";
+import MovieForm from "./MovieForm";
+import ModalContainer from "../modals/ModalContainer";
 
-export default function MovieUpload() {
-  const [videoSelected, setVideoSelected] = useState(true);
+export default function MovieUpload({ visible, onClose }) {
+  const [videoSelected, setVideoSelected] = useState(false);
+  const [videoUploaded, setVideoUploaded] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); //uploading progress bar
+  const [videoInfo, setVideoInfo] = useState({});
+
   const { updateNotification } = useNotification(); //notification error from notification context
   const handleTypeError = (error) => {
     updateNotification("error", error);
   };
-
-  const handleChange = async (file) => {
+  // if the uploder part is finished we are creating this object {url, public_id}
+  const handleUploadTrailer = async (data) => {
+    const { error, url, public_id } = await uploadTrailer(
+      data,
+      setUploadProgress
+    );
+    if (error) return updateNotification("error", error);
+    setVideoUploaded(true);
+    setVideoInfo({ url, public_id }); //coming for backend
+  };
+  // console.log(videoInfo);
+  const handleChange = (file) => {
     const formData = new FormData(); //creating formData FormData()A=is abuilding api inside the javascript
     formData.append("video", file); //same name with the backend
 
-    const res = await uploadTrailer(formData);
-    console.log(res);
+    setVideoSelected(true);
+    handleUploadTrailer(formData);
   };
 
+  const getUploadProgressValue = () => {
+    if (!videoUploaded && uploadProgress >= 100) {
+      return "processing";
+    }
+    return `Upload progress ${uploadProgress}%`;
+  };
+  const handleSubmit = async (data) => {
+    if (!videoInfo.url && !videoInfo.public_id)
+      return updateNotification("error", "trailer is missing");
+    data.append("trailer", JSON.stringify(videoInfo)); //we are attaching them inside with this string form
+    const res = await uploadMovie(data);
+    console.log(res);
+
+    onClose()
+  };
+
+  //the uploader interface
   return (
-    <div className="fixed inset-0 dark:bg-white dark:bg-opacity-50 bg-primary bg-opacity-50 backdrop-blur-sm flex items-center justify-center">
-      <div className="dark:bg-primary bg-white rounded w-[45rem] h-[40rem] overflow-auto">
+    <ModalContainer visible={visible}>
+      <UploadProgress
+        visible={!videoUploaded && videoSelected}
+        message={getUploadProgressValue()}
+        width={uploadProgress}
+      />
+      {!videoSelected ? (//if this video is not selected we render the trailerSelector
         <TrailerSelector
           visible={!videoSelected}
           onTypeError={handleTypeError}
           handleChange={handleChange}
         />
-      </div>
-    </div>
+      ) : (//otherwise we render the movieform its self
+        <MovieForm btnTitle="upload" onSubmit={handleSubmit} />
+      )}
+    </ModalContainer>
   );
 }
 
@@ -50,6 +90,23 @@ const TrailerSelector = ({ visible, handleChange, onTypeError }) => {
           <p>Drop your file here!</p>
         </div>
       </FileUploader>
+    </div>
+  );
+};
+
+const UploadProgress = ({ width, message, visible }) => {
+  if (!visible) return null;
+  return (
+    <div className="dark:bg-secondary bg-white drop-shadow-lg rounded p-3">
+      <div className="relative h-3 dark:bg-dark-subtle bg-light-subtle overflow-hidden">
+        <div
+          style={{ width: width + "%" }}
+          className="h-full absolute left-0 dark:bg-white bg-danger"
+        />
+      </div>
+      <p className="font-serif dark:text-dark-subtle text-light-subtle animate-pulse">
+        {message}
+      </p>
     </div>
   );
 };

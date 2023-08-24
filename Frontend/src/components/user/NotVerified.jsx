@@ -1,7 +1,7 @@
 import React from 'react'
 import { useAuth } from '../../hooks';
 import { useNavigate } from 'react-router-dom';
-import Container from '../Container';
+
 
 export default function NotVerified() {
  
@@ -16,7 +16,7 @@ export default function NotVerified() {
     };
 
     return (
-      <Container>
+      <div>
         {isLoggedIn && !isVerified ? (
           <p className="text-lg text-center bg-blue-50 p-2">
             you haven t verify your account ,
@@ -28,7 +28,7 @@ export default function NotVerified() {
             </button>
           </p>
         ) : null}
-      </Container>
+      </div>
     );
   }
   //if this user is loggedin and isnot verified only then we are render it this (Container) otherwise we render null(this Container has no value)
