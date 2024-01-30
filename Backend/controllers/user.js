@@ -133,7 +133,7 @@ const resendEmailVerificationToken = async (req, res) => {
             "Only after one hour you can request for another token!"
         );
 
-    let OTP = "";
+    let OTP = ""; 
     for (let i = 0; i <= 5; i++) {
         const randomValue = Math.round(Math.random() * 9)
         OTP += randomValue;
