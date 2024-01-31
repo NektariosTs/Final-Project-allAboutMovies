@@ -109,9 +109,9 @@ const MovieCard = ({ movie, onDeleteClick, onEditClick, onOpenClick }) => {
               <button onClick={onEditClick} type="button">
                 <BsPencilSquare />
               </button>
-              <button onClick={onOpenClick} type="button">
+              {/* <button onClick={onOpenClick} type="button">
                 <BsBoxArrowUpRight />
-              </button>
+              </button> */}
             </div>
           </td>
         </tr>

@@ -9,7 +9,7 @@ import NotFoundText from "../NotFoundText";
 import ConfirmModal from "../modals/ConfirmModal";
 
 let currentPageNo = 0;
-const limit = 10;
+const limit = 12;
 
 export default function Actors() {
   const [actors, setActors] = useState([]);

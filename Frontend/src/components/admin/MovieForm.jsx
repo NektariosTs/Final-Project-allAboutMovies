@@ -214,7 +214,7 @@ export default function MovieForm({ onSubmit,btnTitle, initialState }) {
               className={
                 commonInputClasses + " border-b-2 font-semibold text-xl"
               }
-              placeholder="Titanic"
+              placeholder="Movie title..."
             />
           </div>
 
